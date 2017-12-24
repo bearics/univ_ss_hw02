@@ -21,13 +21,20 @@ void hyounglin(void)
         char mtext[100];
 	};
 
-	struct mymsgbuf mb;
-	mb.mytype = 1;
+	struct mymsgbuf mb, mb2;
+
+	mb.mytype = 2;
 	strcpy(mb.mtext, "hello");
 
 	int id = mymsgget(1234, 0);
 	mymsgsnd(id, (void*)&mb, 100, 1);
+	printf("send fin \n");
+	sleep(2);
 
+	mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	printf("rcv gogo \n");
+	printf("type : %ld", mb2.mytype);
+	printf(", text : %s\n", mb2.mtext);
 	sleep(10);
 }
 

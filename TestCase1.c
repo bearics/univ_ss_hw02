@@ -4,7 +4,6 @@
 struct mymsgbuf{
         long mytype;
         char mtext[MAX_TEXT];
-
 };
 int mykey = 1234;
 

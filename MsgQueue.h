@@ -22,7 +22,7 @@ typedef struct _Message {
 typedef struct _Qcb {
 	int 		msgCount;
 	Message*	pMsgHead;
-		Message*	pMsgTail;
+	Message*	pMsgTail;
 	int 		waitThreadCount;
 	Thread*		pThreadHead;
 	Thread*		pThreadTail;

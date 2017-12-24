@@ -9,5 +9,8 @@ void Init(){
 	pthread_cond_init(&mainCond, NULL);
 
 	runStop=0;
+
+	/* for msgQ */
+	_InitMsgQueue();
 }
 
