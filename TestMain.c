@@ -52,40 +52,16 @@ void hyounglin(void)
 	mymsgrcv(id2, (void *)&mb2, 100, 2,0);
 
 
-	// mymsgrcv(id, (void *)&mb2, 100, 2,0);
-	// printMS();
-	// mymsgrcv(id, (void *)&mb2, 100, 2,0);
-	// printMS();
-	// mymsgrcv(id, (void *)&mb2, 100, 2,0);
-	// printMS();
-	// mymsgrcv(id, (void *)&mb2, 100, 2,0);
-	// printMS();
-	// mymsgrcv(id, (void *)&mb2, 100, 2,0);
-	// printMS();
-	// mymsgrcv(id, (void *)&mb2, 100, 2,0);
-	// printMS();
-	// mymsgrcv(id, (void *)&mb2, 100, 2,0);
-	// printMS();
-	// mymsgrcv(id, (void *)&mb2, 100, 2,0);
-	// printMS();
+	mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	mymsgrcv(id, (void *)&mb2, 100, 2,0);
 
-	// mymsgrcv(id2, (void *)&mb2, 100, 2,0);
-	// printMS();
-	// mymsgrcv(id2, (void *)&mb2, 100, 2,0);
-	// printMS();
-	// mymsgrcv(id2, (void *)&mb2, 100, 2,0);
-	// printMS();
-	// mymsgrcv(id2, (void *)&mb2, 100, 2,0);
-	// printMS();
-	// mymsgrcv(id2, (void *)&mb2, 100, 2,0);
-	// printMS();
-	// mymsgrcv(id2, (void *)&mb2, 100, 2,0);
-	// printMS();
-	// mymsgrcv(id2, (void *)&mb2, 100, 2,0);
-	// printMS();
-	// mymsgrcv(id2, (void *)&mb2, 100, 2,0);
-	// printMS();
-
+	printMS();
 
 	printf("rcv gogo \n");
 	printf("type : %ld", mb2.mytype);

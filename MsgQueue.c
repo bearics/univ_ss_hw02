@@ -49,8 +49,10 @@ int 	mymsgsnd(int msqid, const void *msgp, int msgsz, int msgflg)
 	runStop++;
 	pthread_mutex_lock(&mainMutex);
 
+
 	Qcb* qcb = qcbTblEntry[msqid].pQcb;
 	struct mymsgbuf* msg = (struct mymsgbuf *)msgp;
+
 
 	// make newmsgNode & add in Queue
 	Message* newmsg = (Message*)malloc(sizeof(Message));
@@ -167,7 +169,14 @@ int	mymsgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg)
 
 		runStop++;
 		pthread_mutex_lock(&mainMutex);
-		cur = qcb->pMsgTail;
+		cur = qcb->pMsgHead;
+		while( cur != NULL )
+		{
+			if(cur->type == msgtyp)
+				break;
+			cur = cur->pNext;
+		}
+		
 	}
 
 	// delete msg
@@ -204,21 +213,51 @@ int	mymsgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg)
 	qcb->msgCount--;
 
 	runResume();
+
 	return strlen(msg->mtext);
 }
 
 
 int 	mymsgctl(int msqid, int cmd, void* buf)
 {
+	int res=0;
+	runStop++;
+	pthread_mutex_lock(&mainMutex);
 
+	Qcb* qcb = qcbTblEntry[msqid].pQcb;
+	qcbTblEntry[msqid].key=-1;
 
+	// delete msg
+	Message* pM = qcb->pMsgHead;
+	if(pM != NULL)
+		res=-1;
+	while(pM != NULL)
+	{
+		Message* del=pM;
+		pM=pM->pNext;
+		free(del);
+	}
+
+	// delete thread
+	Thread* pT = qcb->pThreadHead;
+	while(pT != NULL)
+	{
+		insertAtTail(READY_QUEUE, pT);
+		pT=pT->pNext;
+	}
+
+	free(qcb);
+
+	runResume();
+
+	return res;
 }
 
 void printMS()
 {
 	
 	printf("-------QCB TABLE!-------\n");
-	for(int i=0; i<MAX_QCB_SIZE; i++) {
+	for(int i=0; i<3; i++) {
 		printf("  %2d |  %p  |\n", qcbTblEntry[i].key,  qcbTblEntry[i].pQcb);
 		if( qcbTblEntry[i].pQcb != NULL)
 		{
@@ -242,6 +281,6 @@ void printMS()
 	}
 
 	printf("-------QCB FIN!!!-------\n");
-	printQ();	
+	//printQ();	
 
 }
