@@ -27,11 +27,66 @@ void hyounglin(void)
 	strcpy(mb.mtext, "hello");
 
 	int id = mymsgget(1234, 0);
+	int id2 = mymsgget(1231, 0);
 	mymsgsnd(id, (void*)&mb, 100, 1);
-	printf("send fin \n");
-	sleep(2);
+	mymsgsnd(id, (void*)&mb, 100, 1);
+	mymsgsnd(id, (void*)&mb, 100, 1);
+	mymsgsnd(id, (void*)&mb, 100, 1);
+	mymsgsnd(id, (void*)&mb, 100, 1);
+	mymsgsnd(id, (void*)&mb, 100, 1);
+	mymsgsnd(id, (void*)&mb, 100, 1);
+	mymsgsnd(id, (void*)&mb, 100, 1);
+	mymsgsnd(id2, (void*)&mb, 100, 1);
+	mymsgsnd(id2, (void*)&mb, 100, 1);
+	mymsgsnd(id2, (void*)&mb, 100, 1);
+	mymsgsnd(id2, (void*)&mb, 100, 1);
+	mymsgsnd(id2, (void*)&mb, 100, 1);
+	mymsgsnd(id2, (void*)&mb, 100, 1);
+	mymsgsnd(id2, (void*)&mb, 100, 1);
 
-	mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	printMS();
+
+	printf("send fin \n");
+
+	//printQ();
+	mymsgrcv(id2, (void *)&mb2, 100, 2,0);
+
+
+	// mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	// printMS();
+	// mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	// printMS();
+	// mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	// printMS();
+	// mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	// printMS();
+	// mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	// printMS();
+	// mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	// printMS();
+	// mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	// printMS();
+	// mymsgrcv(id, (void *)&mb2, 100, 2,0);
+	// printMS();
+
+	// mymsgrcv(id2, (void *)&mb2, 100, 2,0);
+	// printMS();
+	// mymsgrcv(id2, (void *)&mb2, 100, 2,0);
+	// printMS();
+	// mymsgrcv(id2, (void *)&mb2, 100, 2,0);
+	// printMS();
+	// mymsgrcv(id2, (void *)&mb2, 100, 2,0);
+	// printMS();
+	// mymsgrcv(id2, (void *)&mb2, 100, 2,0);
+	// printMS();
+	// mymsgrcv(id2, (void *)&mb2, 100, 2,0);
+	// printMS();
+	// mymsgrcv(id2, (void *)&mb2, 100, 2,0);
+	// printMS();
+	// mymsgrcv(id2, (void *)&mb2, 100, 2,0);
+	// printMS();
+
+
 	printf("rcv gogo \n");
 	printf("type : %ld", mb2.mytype);
 	printf(", text : %s\n", mb2.mtext);
@@ -58,7 +113,6 @@ void main(int argc, char* argv[])
 	Init();
 	
 	TcNum = atoi(argv[1]);
-	
 	switch(TcNum)
 	{
 		case 0:

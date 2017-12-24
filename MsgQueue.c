@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "MsgQueue.h"
+#include "run.h"
 
 struct mymsgbuf{
         long mytype;
@@ -19,6 +20,8 @@ int 	mymsgget(int key, int msgflg)
 {
 	int i=0;
 	while(1){// goto last in QCB Table
+		if(qcbTblEntry[(i)].key == key)
+			return i;
 		if(qcbTblEntry[(i)].key == -1)
 			break;
 		i++;
@@ -43,6 +46,16 @@ int 	mymsgget(int key, int msgflg)
 
 int 	mymsgsnd(int msqid, const void *msgp, int msgsz, int msgflg)
 {
+	runStop++;
+	pthread_mutex_lock(&mainMutex);
+
+
+	printf("\n\n\n\nsnd!!!\n\n\n\n");
+
+	printf("\n\nbefore111\n\n");
+	printMS();
+
+
 	Qcb* qcb = qcbTblEntry[msqid].pQcb;
 	struct mymsgbuf* msg = (struct mymsgbuf *)msgp;
 
@@ -50,25 +63,84 @@ int 	mymsgsnd(int msqid, const void *msgp, int msgsz, int msgflg)
 	Message* newmsg = (Message*)malloc(sizeof(Message));
 	newmsg->type = msg->mytype;
 	strcpy(newmsg->data, msg->mtext);
-	newmsg->size = msgsz;
+	newmsg->size = strlen(msg->mtext);
 	newmsg->pPrev = qcb->pMsgTail;
 	newmsg->pNext = NULL;
 
 	// update msghead, tail in qcb
 	if(qcb->pMsgHead == NULL)
 		qcb->pMsgHead = newmsg;
+	else
+		(qcb->pMsgTail)->pNext = newmsg;
 	qcb->pMsgTail = newmsg;
+	qcb->msgCount++;
 
+	printf("\n\nbefore\n\n");
+	printMS();
+
+	// find msg in waiting Queue
+	Thread* cur = qcb->pThreadHead;
+	while(cur != NULL)
+	{
+		if(cur->type == msg->mytype)
+		{
+			if(cur->pPrev == NULL)
+			{
+				if(cur->pNext == NULL)
+				{
+					qcb->pThreadHead = NULL;
+					qcb->pThreadTail = NULL;
+				}
+				else
+				{
+					qcb->pThreadHead = cur->pNext;
+					(cur->pNext)->pPrev = NULL;
+				}
+			}
+			else
+			{
+				if(cur->pNext == NULL)
+				{
+					(cur->pPrev)->pNext = NULL;
+					qcb->pThreadTail = cur->pPrev;
+				}
+				else
+				{
+					(cur->pPrev)->pNext = cur->pNext;
+					(cur->pNext)->pPrev = cur->pPrev;
+				}
+			}
+			cur->status = THREAD_STATUS_READY;
+			insertAtTail(READY_QUEUE, cur);
+			qcb->waitThreadCount--;
+			printf("\ngogoogogo\n\n");
+			printQ();
+			break;
+		}
+		// not equal type
+		cur = cur->pNext;
+	}
+
+	printMS();
+	printf("fin snd~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\\n");
+	runResume();
+	return strlen(msg->mtext);	
 }
 
 int	mymsgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg)
 {
+	runStop++;
+	pthread_mutex_lock(&mainMutex);
+
+	printMS();
+	printf("\n\n\n\nrcv!!!\n\n\n\n");
 	Qcb* qcb = qcbTblEntry[msqid].pQcb;
 	struct mymsgbuf* msg = (struct mymsgbuf *)msgp;
 
 	Message* cur = qcb->pMsgHead;
 
-	while(cur != NULL){
+	while(cur != NULL)
+	{
 		if(cur->type == msgtyp)
 			break;
 		cur = cur->pNext;
@@ -76,15 +148,86 @@ int	mymsgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg)
 
 	if( cur == NULL) // no in msgQ
 	{
+		printf("run th : %u\n", (unsigned int)(runTh->tid));
+		if(qcb->pThreadHead == NULL)
+		{	// add thread
+			qcb->pThreadHead = runTh;
+			qcb->pThreadTail = runTh;
+		}
+		else
+		{	// add thread
+			(qcb->pThreadTail)->pNext = runTh;
+			runTh->pPrev = qcb->pThreadTail;
+			qcb->pThreadTail = runTh;
+		}
+		qcb->waitThreadCount++;
 
+		runTh->type = msgtyp;
+		runTh->status = THREAD_STATUS_BLOCKED;
+
+		printf("\n\n\n\nhkhkhkhkhkhk\n\n\n\n");
+		printMS();
+
+		// sleep thread
+
+		
+		Thread* pTh = runTh;
+		runTh=NULL;
+		pTh->bRunnable = FALSE;
+
+
+		runResume();
+		pthread_mutex_lock(&(pTh->readyMutex));
+		waitCreate=1;
+		pthread_cond_wait(&(pTh->readyCond), &(pTh->readyMutex));
+		pthread_mutex_unlock(&(pTh->readyMutex));
+
+
+		//		__thread_wait_handler(0);
+
+		runStop++;
+		pthread_mutex_lock(&mainMutex);
+		cur = qcb->pMsgTail;
+	}
+	
+	// delete msg
+	if(cur->pPrev == NULL)
+	{
+		if(cur->pNext == NULL)
+		{
+			qcb->pMsgHead = NULL;
+			qcb->pMsgTail = NULL;
+		}
+		else
+		{
+			qcb->pMsgHead = cur->pNext;
+			(cur->pNext)->pPrev = NULL;
+		}
+	}
+	else
+	{
+		if(cur->pNext == NULL)
+		{
+			(cur->pPrev)->pNext = NULL;
+			qcb->pMsgTail = cur->pPrev;
+		}
+		else
+		{
+			(cur->pPrev)->pNext = cur->pNext;
+			(cur->pNext)->pPrev = cur->pPrev;
+		}
 	}
 
-	// copy msg to user
+
 	bzero(msg, 100);
 	msg->mytype = cur->type;
 	strcpy(msg->mtext, cur->data);
-	
+	qcb->msgCount--;
 
+	printMS();
+	runResume();
+	printf("fin rcv~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+	return strlen(msg->mtext);
 }
 
 
@@ -96,9 +239,32 @@ int 	mymsgctl(int msqid, int cmd, void* buf)
 
 void printMS()
 {
+	
 	printf("-------QCB TABLE!-------\n");
-	for(int i=0; i<MAX_QCB_SIZE; i++)
-		printf("  %2d |  %p     |\n", qcbTblEntry[i++].key,  qcbTblEntry[i++].pQcb);
+	for(int i=0; i<MAX_QCB_SIZE; i++) {
+		printf("  %2d |  %p  |\n", qcbTblEntry[i].key,  qcbTblEntry[i].pQcb);
+		if( qcbTblEntry[i].pQcb != NULL)
+		{
+			Message* pM =(qcbTblEntry[i].pQcb)->pMsgHead;
+			while(pM != NULL)
+			{
+				printf("\t\>> type:%ld  , text: %s\n",pM->type, pM->data);
+				pM = pM->pNext;
+			}
+			printf("\t--------------------------------\n");
+			Thread* pTh = (qcbTblEntry[i].pQcb)->pThreadHead;
+			while(pTh != NULL)
+			{
+				printf("\t>> type : %ld , tid:%u\n", pTh->type, (unsigned int)(pTh->tid));
+				printf("\t *  Prev : %p,  \tNext : %p,     \ttid: %u\n",  pTh->pPrev, pTh->pNext, (unsigned int)(pTh->tid));
+				printf("\t *  status : %d,  \tbRunnable : %d   ptid : %u\n", pTh->status, pTh->bRunnable, (unsigned int)(pTh->parentTid));
+				pTh = pTh->pNext;
+				sleep(1);
+			}
+		}
+	}
+
 	printf("-------QCB FIN!!!-------\n");
+	printQ();	
 
 }

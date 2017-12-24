@@ -5,7 +5,7 @@
 
 
 
-#define TIMESLICE	(1)
+#define TIMESLICE	(2)
 
 
 typedef int BOOL;
@@ -31,6 +31,7 @@ typedef struct _Thread {
 	pthread_t			parentTid;
 	Thread*				pPrev;
 	Thread*				pNext;
+	long				type;
 } Thread;	
 
 typedef struct __wrapperArg {

@@ -34,7 +34,7 @@ void __thread_wait_handler(int signo)
 {
 	Thread* pTh;
 	if((pTh = searchQueue(READY_QUEUE, pthread_self())) == NULL){
-		if((pTh = searchQueue(WAITING_QUEUE, pthread_self())) == NULL){
+		if((pTh = searchQueue(WAITING_QUEUE, pthread_self())) == NULL){ 
 			pTh = runTh;
 		}
 	}
@@ -79,6 +79,7 @@ Thread* createNode(thread_t tid)
 	pthread_mutex_init(&(newNode->readyMutex), NULL);
 	newNode->pNext = NULL;
 	newNode->pPrev = NULL;
+	newNode->type = -1;
 
 	return newNode;
 }
@@ -216,10 +217,11 @@ void print(Queue queue)
 
 void runResume()
 {
-	pthread_cond_signal(&mainCond);
-	pthread_mutex_unlock(&mainMutex);
 	if(--runStop < 0)
 		runStop=0;
+	pthread_cond_signal(&mainCond);
+	pthread_mutex_unlock(&mainMutex);
+	printf("self=%u, run=%d\n",pthread_self(), runStop);
 	return;
 }
 void printQ()
