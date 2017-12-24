@@ -49,13 +49,6 @@ int 	mymsgsnd(int msqid, const void *msgp, int msgsz, int msgflg)
 	runStop++;
 	pthread_mutex_lock(&mainMutex);
 
-
-	printf("\n\n\n\nsnd!!!\n\n\n\n");
-
-	printf("\n\nbefore111\n\n");
-	printMS();
-
-
 	Qcb* qcb = qcbTblEntry[msqid].pQcb;
 	struct mymsgbuf* msg = (struct mymsgbuf *)msgp;
 
@@ -74,9 +67,6 @@ int 	mymsgsnd(int msqid, const void *msgp, int msgsz, int msgflg)
 		(qcb->pMsgTail)->pNext = newmsg;
 	qcb->pMsgTail = newmsg;
 	qcb->msgCount++;
-
-	printf("\n\nbefore\n\n");
-	printMS();
 
 	// find msg in waiting Queue
 	Thread* cur = qcb->pThreadHead;
@@ -113,16 +103,12 @@ int 	mymsgsnd(int msqid, const void *msgp, int msgsz, int msgflg)
 			cur->status = THREAD_STATUS_READY;
 			insertAtTail(READY_QUEUE, cur);
 			qcb->waitThreadCount--;
-			printf("\ngogoogogo\n\n");
-			printQ();
 			break;
 		}
 		// not equal type
 		cur = cur->pNext;
 	}
 
-	printMS();
-	printf("fin snd~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\\n");
 	runResume();
 	return strlen(msg->mtext);	
 }
@@ -132,8 +118,6 @@ int	mymsgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg)
 	runStop++;
 	pthread_mutex_lock(&mainMutex);
 
-	printMS();
-	printf("\n\n\n\nrcv!!!\n\n\n\n");
 	Qcb* qcb = qcbTblEntry[msqid].pQcb;
 	struct mymsgbuf* msg = (struct mymsgbuf *)msgp;
 
@@ -148,7 +132,6 @@ int	mymsgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg)
 
 	if( cur == NULL) // no in msgQ
 	{
-		printf("run th : %u\n", (unsigned int)(runTh->tid));
 		if(qcb->pThreadHead == NULL)
 		{	// add thread
 			qcb->pThreadHead = runTh;
@@ -165,8 +148,6 @@ int	mymsgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg)
 		runTh->type = msgtyp;
 		runTh->status = THREAD_STATUS_BLOCKED;
 
-		printf("\n\n\n\nhkhkhkhkhkhk\n\n\n\n");
-		printMS();
 
 		// sleep thread
 
@@ -174,7 +155,6 @@ int	mymsgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg)
 		Thread* pTh = runTh;
 		runTh=NULL;
 		pTh->bRunnable = FALSE;
-
 
 		runResume();
 		pthread_mutex_lock(&(pTh->readyMutex));
@@ -189,7 +169,7 @@ int	mymsgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg)
 		pthread_mutex_lock(&mainMutex);
 		cur = qcb->pMsgTail;
 	}
-	
+
 	// delete msg
 	if(cur->pPrev == NULL)
 	{
@@ -218,15 +198,12 @@ int	mymsgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg)
 		}
 	}
 
-
 	bzero(msg, 100);
 	msg->mytype = cur->type;
 	strcpy(msg->mtext, cur->data);
 	qcb->msgCount--;
 
-	printMS();
 	runResume();
-	printf("fin rcv~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 	return strlen(msg->mtext);
 }
 

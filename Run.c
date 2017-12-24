@@ -221,7 +221,6 @@ void runResume()
 		runStop=0;
 	pthread_cond_signal(&mainCond);
 	pthread_mutex_unlock(&mainMutex);
-	printf("self=%u, run=%d\n",pthread_self(), runStop);
 	return;
 }
 void printQ()

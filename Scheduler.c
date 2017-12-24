@@ -15,12 +15,10 @@ int		RunScheduler( void )
 		
 		//printQ();
 		pthread_mutex_lock(&mainMutex);
-		printf("www%d\n", runStop);
 		if(runStop != 0){
 			pthread_cond_wait(&mainCond, &mainMutex);
 		}
 		__ContextSwitch(runTh, ReadyQHead);
-		pthread_mutex_unlock(&mainMutex);
 		sleep(TIMESLICE);
 		
 	}
@@ -34,8 +32,6 @@ void    __ContextSwitch(Thread* pCurThread, Thread* pNewThread)
 		return;	// nothing to run
 	if(pCurThread != NULL)
 	{
-		printf("cur=%u, new=%u\n",pCurThread->tid, pNewThread->tid);
-		//printQ();
 		if(pCurThread->status != THREAD_STATUS_BLOCKED)
 			pCurThread->status = THREAD_STATUS_READY;
 			pthread_kill(pCurThread->tid, SIGUSR1);
@@ -44,6 +40,7 @@ void    __ContextSwitch(Thread* pCurThread, Thread* pNewThread)
 	// ready to run new th
 	runTh = deleteAtFirst(READY_QUEUE);
 	runTh->status = THREAD_STATUS_RUN;
+	pthread_mutex_unlock(&mainMutex);
 	__thread_wakeup(runTh);	
 	return;
 }

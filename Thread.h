@@ -5,7 +5,7 @@
 
 
 
-#define TIMESLICE	(2)
+#define TIMESLICE	(1)
 
 
 typedef int BOOL;
