@@ -220,17 +220,22 @@ int	mymsgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg)
 
 int 	mymsgctl(int msqid, int cmd, void* buf)
 {
-	int res=0;
 	runStop++;
 	pthread_mutex_lock(&mainMutex);
 
 	Qcb* qcb = qcbTblEntry[msqid].pQcb;
-	qcbTblEntry[msqid].key=-1;
-
-	// delete msg
 	Message* pM = qcb->pMsgHead;
-	if(pM != NULL)
-		res=-1;
+	Thread* pT = qcb->pThreadHead;
+
+	if(pM != NULL )
+	{	// if there is msg, return
+		runResume();
+		return -1;
+	}
+
+	qcbTblEntry[msqid].key=-1;
+	// delete msg
+	
 	while(pM != NULL)
 	{
 		Message* del=pM;
@@ -239,7 +244,7 @@ int 	mymsgctl(int msqid, int cmd, void* buf)
 	}
 
 	// delete thread
-	Thread* pT = qcb->pThreadHead;
+	
 	while(pT != NULL)
 	{
 		insertAtTail(READY_QUEUE, pT);
@@ -250,7 +255,7 @@ int 	mymsgctl(int msqid, int cmd, void* buf)
 
 	runResume();
 
-	return res;
+	return 0;
 }
 
 void printMS()

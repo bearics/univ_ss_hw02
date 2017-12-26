@@ -64,16 +64,8 @@ void RemoveMessageQueue(){
 	{
 		perror("msgget");
 		exit(1);
-
 	}
-	while(1){
-		if(mymsgctl(msgid,MY_IPC_RMID,0)!=-1){
-			break;
-		}
-		else{
-			continue ;
-		}
-	}
+	while(mymsgctl(msgid,MY_IPC_RMID,0) <0)	{}
 }
 
 
