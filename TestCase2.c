@@ -64,8 +64,16 @@ void RemoveMessageQueue(){
 	{
 		perror("msgget");
 		exit(1);
+
 	}
-	mymsgctl(msgid,MY_IPC_RMID,0);
+	while(1){
+		if(mymsgctl(msgid,MY_IPC_RMID,0)!=-1){
+			break;
+		}
+		else{
+			continue ;
+		}
+	}
 }
 
 
@@ -81,7 +89,7 @@ void TestCase2(void)
 	thread_create(&pid[1],NULL,(void*)SendInTestCase2,(void*)2);
 	thread_create(&pid[2],NULL,(void*)SendInTestCase2,(void*)3);
 
-	sleep(30);
+	sleep(10);
 
-	//RemoveMessageQueue();
+	RemoveMessageQueue();
 }

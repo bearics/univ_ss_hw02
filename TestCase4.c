@@ -1,4 +1,4 @@
-#include "TestCase3.h"
+#include "TestCase4.h"
 #define MAX_TEXT 512
 struct mymsgbuf{
 		long mytype;
@@ -83,8 +83,15 @@ void RemoveMessageQueueTest4(int inputKey){
 		perror("msgget");
 		exit(1);
 
+	}	
+	while(1){
+		if(mymsgctl(msgid,MY_IPC_RMID,0)!=-1){
+			break;
+		}
+		else{
+			continue ;
+		}
 	}
-	mymsgctl(msgid,MY_IPC_RMID,0);
 }
 
 
@@ -96,9 +103,9 @@ void TestCase4(void)
 	thread_create(&pid[1],NULL,(void*)Receiver,(void*)key);
 	thread_create(&pid[0],NULL,(void*)Sender,(void*)key);
 
-	sleep(30);
-	//RemoveMessageQueueTest4(1234);
-	//RemoveMessageQueueTest4(1235);
+	sleep(10);
+	RemoveMessageQueueTest4(1234);
+	RemoveMessageQueueTest4(1235);
 
 
 }
