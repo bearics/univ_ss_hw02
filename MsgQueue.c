@@ -182,7 +182,7 @@ int	mymsgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg)
 	if(cur == NULL)
 	{
 		runResume();
-		return -1;
+		return strlen(msg->mtext);
 	}
 
 	// delete msg
