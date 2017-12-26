@@ -179,6 +179,12 @@ int	mymsgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg)
 		
 	}
 
+	if(cur == NULL)
+	{
+		runResume();
+		return -1;
+	}
+
 	// delete msg
 	if(cur->pPrev == NULL)
 	{
